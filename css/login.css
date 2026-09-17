@@ -1,0 +1,1283 @@
+/* =========================================
+   MINDSPACE LOGIN
+   Plain CSS
+   ========================================= */
+
+
+/* ---------- VARIABLES ---------- */
+
+:root {
+    --primary: #1a1a1a;
+    --primary-light: #2b2b2b;
+
+    --background: #f5f0e8;
+    --surface: #ffffff;
+    --surface-low: #f2ede5;
+    --surface-high: #e8e3da;
+
+    --accent: #ffcc00;
+    --accent-soft: #fff1a8;
+
+    --blue: #0055ff;
+    --blue-soft: #d6e3ff;
+
+    --text: #1a1a1a;
+    --text-muted: #5b5b5b;
+
+    --border: #d0cbc3;
+
+    --error: #cc0000;
+    --error-background: #ffdad6;
+
+    --success: #16845b;
+
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+
+    --shadow:
+        0 20px 50px rgba(26, 26, 26, 0.10);
+
+    --transition: 0.2s ease;
+}
+
+
+/* ---------- RESET ---------- */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    min-height: 100vh;
+
+    background: var(--background);
+
+    color: var(--text);
+
+    font-family: "Inter", sans-serif;
+
+    display: flex;
+    flex-direction: column;
+
+    overscroll-behavior: none;
+}
+
+button,
+input {
+    font-family: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+
+/* ---------- HEADER ---------- */
+
+.site-header {
+    width: 100%;
+
+    padding: 24px 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+
+/* ---------- BRAND ---------- */
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.brand-icon {
+    width: 42px;
+    height: 42px;
+
+    background: var(--primary);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.brand-icon span {
+    color: var(--accent);
+
+    font-size: 24px;
+}
+
+.brand-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.brand-name {
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 20px;
+    font-weight: 700;
+
+    letter-spacing: -0.5px;
+    text-transform: uppercase;
+
+    line-height: 1;
+}
+
+.brand-subtitle {
+    margin-top: 4px;
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 10px;
+
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+
+    color: var(--text-muted);
+}
+
+
+/* ---------- SSO STATUS ---------- */
+
+.sso-status {
+    padding: 8px 12px;
+
+    background: var(--surface-low);
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 11px;
+
+    letter-spacing: 1px;
+    text-transform: uppercase;
+
+    color: var(--text-muted);
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
+    background: var(--blue);
+}
+
+
+/* ---------- MAIN ---------- */
+
+.main-content {
+    width: 100%;
+
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding: 32px 20px;
+}
+
+
+/* ---------- AUTH CONTAINER ---------- */
+
+.auth-container {
+    width: 100%;
+    max-width: 1050px;
+
+    display: flex;
+
+    background: var(--surface);
+
+    border-radius: var(--radius-lg);
+
+    overflow: hidden;
+
+    box-shadow: var(--shadow);
+}
+
+
+/* =========================================
+   LEFT WELLBEING PANEL
+   ========================================= */
+
+.wellbeing-panel {
+    width: 42%;
+
+    min-height: 650px;
+
+    padding: 48px;
+
+    position: relative;
+
+    overflow: hidden;
+
+    background: var(--primary);
+
+    color: white;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.wellbeing-content {
+    position: relative;
+    z-index: 2;
+}
+
+
+/* ---------- AMBIENT CIRCLES ---------- */
+
+.ambient-circle {
+    position: absolute;
+
+    border-radius: 50%;
+
+    pointer-events: none;
+
+    filter: blur(40px);
+}
+
+.circle-one {
+    width: 260px;
+    height: 260px;
+
+    right: -100px;
+    bottom: -80px;
+
+    background: rgba(0, 85, 255, 0.20);
+}
+
+.circle-two {
+    width: 150px;
+    height: 150px;
+
+    top: 40px;
+    right: 30px;
+
+    background: rgba(255, 204, 0, 0.15);
+}
+
+
+/* ---------- BADGE ---------- */
+
+.semester-badge {
+    width: fit-content;
+
+    padding: 7px 12px;
+
+    margin-bottom: 28px;
+
+    background: rgba(255, 255, 255, 0.08);
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 10px;
+
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+}
+
+.badge-dot {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: var(--accent);
+}
+
+
+/* ---------- LEFT HEADING ---------- */
+
+.wellbeing-panel h2 {
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: clamp(34px, 4vw, 48px);
+
+    line-height: 0.98;
+
+    letter-spacing: -1.5px;
+
+    text-transform: uppercase;
+
+    margin-bottom: 20px;
+}
+
+.wellbeing-description {
+    max-width: 330px;
+
+    color: rgba(255, 255, 255, 0.68);
+
+    font-size: 14px;
+
+    line-height: 1.7;
+}
+
+
+/* ---------- PULSE CARD ---------- */
+
+.pulse-card {
+    position: relative;
+    z-index: 2;
+
+    padding: 20px;
+
+    margin: 40px 0;
+
+    background: rgba(255, 255, 255, 0.06);
+
+    border: 1px solid rgba(255, 255, 255, 0.06);
+
+    border-radius: var(--radius-md);
+}
+
+.pulse-header {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 20px;
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 10px;
+
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.calm-index {
+    padding: 5px 8px;
+
+    background: var(--blue);
+
+    color: white;
+
+    font-weight: 700;
+}
+
+
+/* ---------- PULSE CONTENT ---------- */
+
+.pulse-content {
+    display: flex;
+
+    align-items: center;
+
+    gap: 16px;
+}
+
+
+/* ---------- PULSE RING ---------- */
+
+.pulse-ring {
+    width: 70px;
+    height: 70px;
+
+    flex-shrink: 0;
+
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pulse-ring svg {
+    width: 100%;
+    height: 100%;
+
+    transform: rotate(-90deg);
+}
+
+.ring-background {
+    stroke: rgba(255, 255, 255, 0.12);
+}
+
+.ring-progress {
+    stroke: var(--accent);
+}
+
+.pulse-ring > span {
+    position: absolute;
+
+    color: var(--accent);
+
+    font-size: 22px;
+}
+
+
+/* ---------- PULSE TEXT ---------- */
+
+.pulse-text p {
+    margin-bottom: 5px;
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    text-transform: uppercase;
+}
+
+.pulse-text span {
+    display: block;
+
+    color: rgba(255, 255, 255, 0.50);
+
+    font-size: 11px;
+
+    line-height: 1.5;
+}
+
+
+/* ---------- PULSE FOOTER ---------- */
+
+.pulse-footer {
+    margin-top: 18px;
+    padding-top: 14px;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.security-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    color: rgba(255, 255, 255, 0.50);
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 9px;
+
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.security-label span {
+    color: var(--accent);
+
+    font-size: 16px;
+}
+
+.sparkline {
+    width: 90px;
+
+    color: #a8c6ff;
+}
+
+
+/* ---------- QUOTE ---------- */
+
+.charter-note {
+    position: relative;
+    z-index: 2;
+}
+
+.charter-note p {
+    max-width: 350px;
+
+    color: rgba(255, 255, 255, 0.55);
+
+    font-size: 12px;
+
+    line-height: 1.7;
+
+    font-style: italic;
+}
+
+.charter-note span {
+    display: block;
+
+    margin-top: 8px;
+
+    color: var(--accent);
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 10px;
+
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+
+/* =========================================
+   RIGHT LOGIN PANEL
+   ========================================= */
+
+.login-panel {
+    width: 58%;
+
+    padding: 55px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+
+/* ---------- LOGIN HEADER ---------- */
+
+.login-header {
+    margin-bottom: 26px;
+}
+
+.portal-label {
+    margin-bottom: 8px;
+
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    color: var(--blue);
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+}
+
+.portal-label span {
+    font-size: 17px;
+}
+
+.login-header h1 {
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 32px;
+
+    line-height: 1.1;
+
+    letter-spacing: -1px;
+
+    text-transform: uppercase;
+}
+
+.login-header p {
+    margin-top: 7px;
+
+    color: var(--text-muted);
+
+    font-size: 14px;
+
+    line-height: 1.6;
+}
+
+
+/* ---------- SSO BUTTON ---------- */
+
+.sso-button {
+    width: 100%;
+
+    padding: 14px 18px;
+
+    border: none;
+
+    border-radius: var(--radius-md);
+
+    background: var(--surface-low);
+
+    color: var(--primary);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    letter-spacing: 1px;
+    text-transform: uppercase;
+
+    transition: var(--transition);
+}
+
+.sso-button:hover {
+    background: var(--surface-high);
+
+    transform: translateY(-1px);
+}
+
+.sso-button span {
+    font-size: 20px;
+}
+
+
+/* ---------- DIVIDER ---------- */
+
+.divider {
+    margin: 24px 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+}
+
+.divider span {
+    height: 1px;
+
+    flex: 1;
+
+    background: var(--border);
+}
+
+.divider p {
+    white-space: nowrap;
+
+    color: var(--text-muted);
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 9px;
+
+    letter-spacing: 1px;
+
+    text-transform: uppercase;
+}
+
+
+/* ---------- ALERT ---------- */
+
+.auth-alert {
+    padding: 13px 15px;
+
+    margin-bottom: 20px;
+
+    border-radius: var(--radius-sm);
+
+    background: var(--error-background);
+
+    color: var(--error);
+
+    display: flex;
+    align-items: flex-start;
+
+    gap: 10px;
+
+    font-size: 12px;
+
+    line-height: 1.4;
+}
+
+.auth-alert > span:first-child {
+    font-size: 18px;
+
+    flex-shrink: 0;
+}
+
+
+/* ---------- FORM ---------- */
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+
+    gap: 7px;
+}
+
+.field-header {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+}
+
+.field-header label {
+    color: var(--primary);
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.field-header span,
+.field-header a {
+    color: var(--text-muted);
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 9px;
+
+    letter-spacing: 0.8px;
+
+    text-transform: uppercase;
+}
+
+.field-header a {
+    color: var(--blue);
+
+    font-size: 10px;
+
+    font-weight: 600;
+}
+
+.field-header a:hover {
+    text-decoration: underline;
+}
+
+
+/* ---------- INPUT ---------- */
+
+.input-wrapper {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+}
+
+.input-wrapper > span {
+    position: absolute;
+
+    left: 14px;
+
+    color: var(--text-muted);
+
+    font-size: 19px;
+
+    pointer-events: none;
+}
+
+.input-wrapper input {
+    width: 100%;
+
+    padding: 14px 44px;
+
+    border: 1px solid transparent;
+
+    border-radius: var(--radius-md);
+
+    background: var(--surface-low);
+
+    color: var(--primary);
+
+    outline: none;
+
+    font-size: 14px;
+
+    transition: var(--transition);
+}
+
+.input-wrapper input::placeholder {
+    color: #aaa59e;
+}
+
+.input-wrapper input:focus {
+    border-color: var(--border);
+
+    background: var(--surface);
+    
+    box-shadow: 0 0 0 3px rgba(0, 85, 255, 0.08);
+}
+
+
+/* ---------- PASSWORD TOGGLE ---------- */
+
+.password-toggle {
+    position: absolute;
+
+    right: 8px;
+
+    width: 34px;
+    height: 34px;
+
+    border: none;
+
+    background: transparent;
+
+    color: var(--text-muted);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.password-toggle:hover {
+    color: var(--primary);
+}
+
+.password-toggle span {
+    position: static;
+
+    font-size: 18px;
+}
+
+
+/* ---------- ERRORS ---------- */
+
+.field-error {
+    color: var(--error);
+
+    font-size: 11px;
+}
+
+
+/* ---------- FORM OPTIONS ---------- */
+
+.form-options {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+}
+
+.remember-option {
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    cursor: pointer;
+
+    color: var(--text-muted);
+
+    font-size: 11px;
+}
+
+.remember-option input {
+    width: 16px;
+    height: 16px;
+
+    accent-color: var(--primary);
+
+    cursor: pointer;
+}
+
+
+/* ---------- SUBMIT ---------- */
+
+.submit-button {
+    width: 100%;
+
+    padding: 15px 20px;
+
+    margin-top: 2px;
+
+    border: none;
+
+    border-radius: var(--radius-md);
+
+    background: var(--primary);
+
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 9px;
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    letter-spacing: 1px;
+
+    text-transform: uppercase;
+
+    transition: var(--transition);
+}
+
+.submit-button:hover {
+    background: var(--primary-light);
+
+    transform: translateY(-1px);
+}
+
+.submit-button:active {
+    transform: scale(0.99);
+}
+
+.submit-button:disabled {
+    cursor: not-allowed;
+
+    opacity: 0.65;
+}
+
+.button-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* ---------- PRIVACY ---------- */
+
+.privacy-notice {
+    margin-top: 24px;
+
+    padding: 13px;
+
+    border-radius: var(--radius-md);
+
+    background: var(--surface-low);
+
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 10px;
+}
+
+.privacy-notice > span {
+    color: var(--blue);
+
+    font-size: 19px;
+
+    flex-shrink: 0;
+}
+
+.privacy-notice p {
+    color: var(--text-muted);
+
+    font-size: 11px;
+
+    line-height: 1.5;
+}
+
+.privacy-notice strong {
+    color: var(--primary);
+}
+
+
+/* ---------- SIGNUP ---------- */
+
+.signup-link {
+    margin-top: 22px;
+
+    display: flex;
+    justify-content: center;
+
+    gap: 5px;
+
+    color: var(--text-muted);
+
+    font-size: 11px;
+}
+
+.signup-link a {
+    color: var(--blue);
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.8px;
+}
+
+.signup-link a:hover {
+    text-decoration: underline;
+}
+
+
+/* =========================================
+   TOAST
+   ========================================= */
+
+.toast {
+    position: fixed;
+
+    right: 24px;
+    bottom: 24px;
+
+    max-width: 360px;
+
+    padding: 15px 18px;
+
+    border-radius: var(--radius-md);
+
+    background: var(--primary);
+
+    color: white;
+
+    box-shadow: var(--shadow);
+
+    display: flex;
+    align-items: flex-start;
+
+    gap: 12px;
+
+    opacity: 0;
+
+    transform: translateY(30px);
+
+    pointer-events: none;
+
+    transition: 0.3s ease;
+
+    z-index: 100;
+}
+
+.toast.show {
+    opacity: 1;
+
+    transform: translateY(0);
+
+    pointer-events: auto;
+}
+
+.toast > span {
+    color: var(--accent);
+
+    font-size: 22px;
+}
+
+.toast strong {
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: var(--accent);
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 10px;
+
+    letter-spacing: 1.2px;
+
+    text-transform: uppercase;
+}
+
+.toast p {
+    color: rgba(255, 255, 255, 0.75);
+
+    font-size: 11px;
+
+    line-height: 1.5;
+}
+
+
+/* ---------- UTILITY ---------- */
+
+.hidden {
+    display: none !important;
+}
+
+
+/* =========================================
+   FOOTER
+   ========================================= */
+
+.site-footer {
+    padding: 20px;
+
+    text-align: center;
+
+    color: var(--text-muted);
+
+    font-size: 10px;
+
+    line-height: 1.5;
+}
+
+.site-footer p {
+    max-width: 600px;
+
+    margin: auto;
+}
+
+
+/* =========================================
+   TABLET
+   ========================================= */
+
+@media (max-width: 900px) {
+
+    .site-header {
+        padding: 20px 28px;
+    }
+
+    .wellbeing-panel {
+        padding: 35px;
+    }
+
+    .login-panel {
+        padding: 35px;
+    }
+
+}
+
+
+/* =========================================
+   MOBILE
+   ========================================= */
+
+@media (max-width: 700px) {
+
+    .site-header {
+        padding: 18px 20px;
+    }
+
+    .brand-icon {
+        width: 38px;
+        height: 38px;
+    }
+
+    .brand-name {
+        font-size: 18px;
+    }
+
+    .brand-subtitle {
+        font-size: 8px;
+    }
+
+    .sso-status {
+        display: none;
+    }
+
+    .main-content {
+        padding: 15px;
+    }
+
+    .auth-container {
+        flex-direction: column;
+    }
+
+    .wellbeing-panel {
+        width: 100%;
+
+        min-height: auto;
+
+        padding: 32px 25px;
+    }
+
+    .wellbeing-panel h2 {
+        font-size: 36px;
+    }
+
+    .pulse-card {
+        margin: 30px 0;
+    }
+
+    .charter-note {
+        display: none;
+    }
+
+    .login-panel {
+        width: 100%;
+
+        padding: 30px 25px;
+    }
+
+    .login-header h1 {
+        font-size: 28px;
+    }
+
+    .divider p {
+        font-size: 8px;
+    }
+
+    .toast {
+        left: 15px;
+        right: 15px;
+        bottom: 15px;
+
+        max-width: none;
+    }
+
+}
+
+
+/* =========================================
+   SMALL MOBILE
+   ========================================= */
+
+@media (max-width: 420px) {
+
+    .main-content {
+        padding: 0;
+    }
+
+    .auth-container {
+        border-radius: 0;
+
+        box-shadow: none;
+    }
+
+    .wellbeing-panel,
+    .login-panel {
+        padding: 28px 20px;
+    }
+
+    .wellbeing-panel h2 {
+        font-size: 32px;
+    }
+
+    .pulse-header {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 8px;
+    }
+
+    .field-header span {
+        display: none;
+    }
+
+}
