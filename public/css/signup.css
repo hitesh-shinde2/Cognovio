@@ -1,0 +1,1532 @@
+/* =========================================
+   MINDSPACE SIGNUP
+   Plain CSS
+   ========================================= */
+
+
+/* ---------- VARIABLES ---------- */
+
+:root {
+
+    --primary: #1a1a1a;
+    --primary-light: #2b2b2b;
+
+    --background: #f5f0e8;
+
+    --surface: #ffffff;
+    --surface-low: #f2ede5;
+    --surface-high: #e8e3da;
+    --surface-highest: #e2ddd4;
+
+    --accent: #ffcc00;
+    --blue: #0055ff;
+
+    --blue-soft: #d6e3ff;
+
+    --text: #1a1a1a;
+    --text-muted: #5b5b5b;
+
+    --border: #d0cbc3;
+
+    --error: #cc0000;
+    --error-bg: #ffdad6;
+
+    --success: #16845b;
+
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+
+    --shadow:
+        0 20px 50px rgba(26, 26, 26, 0.10);
+
+    --transition: 0.2s ease;
+}
+
+
+/* ---------- RESET ---------- */
+
+* {
+    box-sizing: border-box;
+
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+
+    min-height: 100vh;
+
+    background: var(--background);
+
+    color: var(--text);
+
+    font-family: "Inter", sans-serif;
+
+    display: flex;
+    flex-direction: column;
+
+    overscroll-behavior: none;
+}
+
+button,
+input,
+select {
+    font-family: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+
+/* =========================================
+   HEADER
+   ========================================= */
+
+.site-header {
+
+    width: 100%;
+
+    padding: 24px 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+
+/* ---------- BRAND ---------- */
+
+.brand {
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+}
+
+.brand-icon {
+
+    width: 42px;
+    height: 42px;
+
+    background: var(--primary);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.brand-icon span {
+
+    color: var(--accent);
+
+    font-size: 24px;
+}
+
+.brand-text {
+
+    display: flex;
+    flex-direction: column;
+}
+
+.brand-name {
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 20px;
+    font-weight: 700;
+
+    line-height: 1;
+
+    text-transform: uppercase;
+
+    letter-spacing: -0.5px;
+}
+
+.brand-subtitle {
+
+    margin-top: 4px;
+
+    color: var(--text-muted);
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 10px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1.5px;
+}
+
+
+/* ---------- STATUS ---------- */
+
+.sso-status {
+
+    padding: 8px 12px;
+
+    background: var(--surface-low);
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    color: var(--text-muted);
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 10px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1px;
+}
+
+.status-dot {
+
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
+    background: var(--blue);
+}
+
+
+/* =========================================
+   MAIN
+   ========================================= */
+
+.main-content {
+
+    width: 100%;
+
+    flex: 1;
+
+    display: flex;
+    justify-content: center;
+
+    padding: 25px 20px 50px;
+}
+
+.signup-container {
+
+    width: 100%;
+
+    max-width: 1120px;
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(300px, 0.85fr)
+        minmax(500px, 1.25fr);
+
+    gap: 30px;
+
+    align-items: start;
+}
+
+
+/* =========================================
+   LEFT COLUMN
+   ========================================= */
+
+.info-column {
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 18px;
+}
+
+
+/* =========================================
+   HERO CARD
+   ========================================= */
+
+.hero-card {
+
+    position: relative;
+
+    overflow: hidden;
+
+    padding: 42px;
+
+    background: var(--primary);
+
+    color: white;
+
+    box-shadow: var(--shadow);
+}
+
+.hero-decoration {
+
+    position: absolute;
+
+    width: 150px;
+    height: 150px;
+
+    right: -60px;
+    top: -60px;
+
+    border-radius: 50%;
+
+    background: var(--accent);
+
+    opacity: 0.12;
+}
+
+.hero-badges {
+
+    display: flex;
+
+    gap: 8px;
+
+    margin-bottom: 28px;
+}
+
+.badge {
+
+    padding: 5px 8px;
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1px;
+}
+
+.badge.confidential {
+
+    background: var(--accent);
+
+    color: var(--primary);
+}
+
+.badge.secure {
+
+    background: var(--blue);
+
+    color: white;
+}
+
+.hero-card h1 {
+
+    position: relative;
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: clamp(36px, 4vw, 50px);
+
+    line-height: 0.95;
+
+    letter-spacing: -1.5px;
+
+    text-transform: uppercase;
+
+    margin-bottom: 20px;
+}
+
+.hero-card p {
+
+    position: relative;
+
+    max-width: 370px;
+
+    color: rgba(255, 255, 255, 0.68);
+
+    font-size: 13px;
+
+    line-height: 1.7;
+}
+
+
+/* ---------- STAT ---------- */
+
+.hero-stat {
+
+    position: relative;
+
+    margin-top: 35px;
+
+    padding-top: 20px;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+
+    display: flex;
+
+    align-items: flex-end;
+
+    justify-content: space-between;
+}
+
+.stat-number {
+
+    display: block;
+
+    color: var(--accent);
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 22px;
+
+    font-weight: 700;
+}
+
+.stat-label {
+
+    display: block;
+
+    margin-top: 4px;
+
+    color: rgba(255, 255, 255, 0.55);
+
+    font-size: 10px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1px;
+}
+
+
+/* ---------- STAT BARS ---------- */
+
+.stat-bars {
+
+    height: 40px;
+
+    display: flex;
+
+    align-items: flex-end;
+
+    gap: 5px;
+}
+
+.bar {
+
+    width: 9px;
+
+    background: var(--accent);
+}
+
+.bar-one {
+    height: 14px;
+}
+
+.bar-two {
+    height: 24px;
+}
+
+.bar-three {
+    height: 38px;
+
+    background: var(--blue);
+}
+
+.bar-four {
+    height: 20px;
+
+    background: #e63b2e;
+}
+
+
+/* =========================================
+   CAMPUS VISUAL
+   ========================================= */
+
+.campus-card {
+
+    overflow: hidden;
+
+    background: var(--surface-high);
+
+    box-shadow:
+        0 8px 25px rgba(26, 26, 26, 0.06);
+}
+
+.campus-visual {
+
+    height: 180px;
+
+    position: relative;
+
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            135deg,
+            #dfe6e1,
+            #c5d5d1
+        );
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.campus-shape {
+
+    position: absolute;
+
+    border-radius: 50%;
+}
+
+.shape-one {
+
+    width: 180px;
+    height: 180px;
+
+    background: rgba(0, 85, 255, 0.12);
+
+    left: -70px;
+    bottom: -80px;
+}
+
+.shape-two {
+
+    width: 140px;
+    height: 140px;
+
+    background: rgba(255, 204, 0, 0.30);
+
+    right: -30px;
+    top: -50px;
+}
+
+.shape-three {
+
+    width: 70px;
+    height: 70px;
+
+    background: rgba(26, 26, 26, 0.08);
+
+    right: 28%;
+    bottom: 20px;
+}
+
+.campus-icon {
+
+    position: relative;
+
+    z-index: 2;
+
+    font-size: 54px;
+
+    color: var(--primary);
+}
+
+.campus-caption {
+
+    padding: 14px 16px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1px;
+}
+
+.campus-caption span:last-child {
+
+    color: var(--blue);
+
+    font-size: 17px;
+}
+
+
+/* =========================================
+   SAFEGUARDS
+   ========================================= */
+
+.safeguards-card {
+
+    padding: 22px;
+
+    background: var(--surface-high);
+
+    box-shadow:
+        0 5px 20px rgba(26, 26, 26, 0.04);
+}
+
+.safeguards-card h2 {
+
+    margin-bottom: 18px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    color: var(--text-muted);
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1.2px;
+}
+
+.safeguard-dot {
+
+    width: 7px;
+    height: 7px;
+
+    background: #e63b2e;
+}
+
+.safeguards-card ul {
+
+    list-style: none;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 14px;
+}
+
+.safeguards-card li {
+
+    display: flex;
+
+    gap: 10px;
+
+    color: var(--text);
+
+    font-size: 11px;
+
+    line-height: 1.5;
+}
+
+.safeguards-card li .material-symbols-outlined {
+
+    flex-shrink: 0;
+
+    color: var(--blue);
+
+    font-size: 18px;
+}
+
+.safeguards-card li:last-child .material-symbols-outlined {
+
+    color: #e63b2e;
+}
+
+
+/* =========================================
+   FORM COLUMN
+   ========================================= */
+
+.form-column {
+
+    padding: 42px;
+
+    background: var(--surface);
+
+    box-shadow: var(--shadow);
+}
+
+
+/* ---------- FORM HEADER ---------- */
+
+.form-header {
+
+    margin-bottom: 28px;
+}
+
+.form-header-row {
+
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 8px;
+}
+
+.section-label {
+
+    color: var(--blue);
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1.4px;
+}
+
+.step-label {
+
+    color: var(--text-muted);
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 9px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1px;
+}
+
+.form-header h2 {
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 32px;
+
+    line-height: 1.1;
+
+    letter-spacing: -1px;
+
+    text-transform: uppercase;
+}
+
+.form-header p {
+
+    margin-top: 7px;
+
+    color: var(--text-muted);
+
+    font-size: 13px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================
+   SSO
+   ========================================= */
+
+.sso-section {
+
+    margin-bottom: 25px;
+}
+
+.sso-button {
+
+    width: 100%;
+
+    padding: 14px;
+
+    border: none;
+
+    border-bottom: 3px solid var(--primary);
+
+    background: var(--surface-high);
+
+    color: var(--primary);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    gap: 10px;
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1px;
+
+    transition: var(--transition);
+}
+
+.sso-button:hover {
+
+    background: var(--surface-highest);
+
+    transform: translateY(-1px);
+}
+
+.sso-button span {
+
+    font-size: 20px;
+}
+
+
+/* ---------- DIVIDER ---------- */
+
+.divider {
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding-top: 22px;
+}
+
+.divider span {
+
+    flex: 1;
+
+    height: 1px;
+
+    background: var(--border);
+}
+
+.divider p {
+
+    white-space: nowrap;
+
+    color: var(--text-muted);
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 9px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1px;
+}
+
+
+/* =========================================
+   FORM
+   ========================================= */
+
+.signup-form {
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 20px;
+}
+
+.form-grid {
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 20px;
+}
+
+
+/* ---------- FORM GROUP ---------- */
+
+.form-group {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+}
+
+.form-group label {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    color: var(--text);
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1px;
+}
+
+
+/* ---------- INPUT ---------- */
+
+.input-wrapper {
+
+    position: relative;
+}
+
+.input-wrapper input {
+
+    width: 100%;
+
+    padding: 13px 42px 13px 13px;
+
+    border: none;
+
+    border-bottom: 2px solid var(--primary);
+
+    outline: none;
+
+    background: var(--surface-low);
+
+    color: var(--primary);
+
+    font-size: 13px;
+
+    transition: var(--transition);
+}
+
+.input-wrapper input::placeholder {
+
+    color: #aaa59e;
+}
+
+.input-wrapper input:focus {
+
+    background: #faf7f2;
+
+    border-bottom-color: var(--blue);
+}
+
+.input-wrapper > span {
+
+    position: absolute;
+
+    right: 12px;
+    top: 12px;
+
+    color: var(--text-muted);
+
+    font-size: 19px;
+
+    pointer-events: none;
+}
+
+
+/* ---------- HINT ---------- */
+
+.field-hint {
+
+    color: var(--text-muted);
+
+    font-size: 10px;
+
+    line-height: 1.4;
+}
+
+
+/* ---------- SELECT ---------- */
+
+.select-wrapper {
+
+    position: relative;
+}
+
+.select-wrapper select {
+
+    width: 100%;
+
+    padding: 13px 42px 13px 13px;
+
+    border: none;
+
+    border-bottom: 2px solid var(--primary);
+
+    outline: none;
+
+    appearance: none;
+
+    background: var(--surface-low);
+
+    color: var(--primary);
+
+    font-size: 13px;
+
+    cursor: pointer;
+}
+
+.select-wrapper > span {
+
+    position: absolute;
+
+    right: 12px;
+    top: 12px;
+
+    color: var(--text-muted);
+
+    pointer-events: none;
+}
+
+
+/* =========================================
+   PASSWORD
+   ========================================= */
+
+.password-toggle {
+
+    position: absolute;
+
+    right: 7px;
+    top: 6px;
+
+    width: 32px;
+    height: 32px;
+
+    border: none;
+
+    background: transparent;
+
+    color: var(--text-muted);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.password-toggle:hover {
+
+    color: var(--primary);
+}
+
+.password-toggle span {
+
+    position: static;
+
+    font-size: 18px;
+}
+
+
+/* =========================================
+   PASSWORD STRENGTH
+   ========================================= */
+
+.strength-row {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    margin-top: 2px;
+
+    color: var(--text-muted);
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 9px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.7px;
+}
+
+.strength-dots {
+
+    display: flex;
+
+    gap: 4px;
+}
+
+.strength-dots span {
+
+    width: 11px;
+    height: 11px;
+
+    background: var(--border);
+
+    transition: var(--transition);
+}
+
+.strength-row strong {
+
+    margin-left: 3px;
+
+    font-size: 9px;
+}
+
+
+/* ---------- STRENGTH STATES ---------- */
+
+.strength-dots.weak span:first-child {
+
+    background: #e63b2e;
+}
+
+.strength-dots.good span:nth-child(1),
+.strength-dots.good span:nth-child(2) {
+
+    background: var(--accent);
+}
+
+.strength-dots.strong span {
+
+    background: var(--blue);
+}
+
+.strength-row.weak strong {
+
+    color: #e63b2e;
+}
+
+.strength-row.good strong {
+
+    color: var(--primary);
+}
+
+.strength-row.strong strong {
+
+    color: var(--blue);
+}
+
+
+/* =========================================
+   PASSWORD MATCH
+   ========================================= */
+
+.match-feedback {
+
+    font-size: 9px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.8px;
+}
+
+.match-feedback.success {
+
+    color: var(--blue);
+}
+
+.match-feedback.error {
+
+    color: var(--error);
+}
+
+
+/* =========================================
+   TERMS
+   ========================================= */
+
+.terms-section {
+
+    padding-top: 2px;
+}
+
+.terms-label {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 10px;
+
+    color: var(--text-muted);
+
+    font-size: 10px;
+
+    line-height: 1.6;
+
+    cursor: pointer;
+}
+
+.terms-label input {
+
+    width: 16px;
+    height: 16px;
+
+    margin-top: 2px;
+
+    flex-shrink: 0;
+
+    accent-color: var(--primary);
+
+    cursor: pointer;
+}
+
+.terms-label a {
+
+    color: var(--blue);
+
+    font-weight: 600;
+}
+
+.terms-label a:hover {
+
+    text-decoration: underline;
+}
+
+
+/* =========================================
+   SUBMIT
+   ========================================= */
+
+.submit-button {
+
+    width: 100%;
+
+    padding: 16px;
+
+    border: none;
+
+    border-bottom: 4px solid #000;
+
+    background: var(--primary);
+
+    color: white;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 10px;
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1.4px;
+
+    transition: var(--transition);
+}
+
+.submit-button:hover {
+
+    background: var(--accent);
+
+    color: var(--primary);
+
+    transform: translateY(-1px);
+}
+
+.submit-button:active {
+
+    transform: translateY(1px);
+}
+
+.submit-button:disabled {
+
+    opacity: 0.6;
+
+    cursor: not-allowed;
+}
+
+
+/* =========================================
+   STATUS TOAST
+   ========================================= */
+
+.status-toast {
+
+    margin-top: 18px;
+
+    padding: 14px;
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.8px;
+
+    line-height: 1.5;
+}
+
+.status-toast.success {
+
+    background: var(--accent);
+
+    color: var(--primary);
+}
+
+.status-toast.error {
+
+    background: var(--error-bg);
+
+    color: var(--error);
+}
+
+
+/* =========================================
+   LOGIN SWITCH
+   ========================================= */
+
+.login-switch {
+
+    margin-top: 25px;
+
+    padding-top: 20px;
+
+    border-top: 1px solid rgba(208, 203, 195, 0.6);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    color: var(--text-muted);
+
+    font-size: 10px;
+}
+
+.login-switch a {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    color: var(--blue);
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.8px;
+}
+
+.login-switch a:hover {
+
+    color: var(--primary);
+}
+
+.login-switch a span {
+
+    font-size: 16px;
+}
+
+
+/* =========================================
+   FOOTER
+   ========================================= */
+
+.site-footer {
+
+    padding: 20px;
+
+    text-align: center;
+
+    color: var(--text-muted);
+
+    font-size: 10px;
+
+    line-height: 1.5;
+}
+
+.site-footer p {
+
+    max-width: 650px;
+
+    margin: auto;
+}
+
+
+/* =========================================
+   UTILITY
+   ========================================= */
+
+.hidden {
+
+    display: none !important;
+}
+
+.field-error {
+
+    color: var(--error);
+}
+
+
+/* =========================================
+   RESPONSIVE — TABLET
+   ========================================= */
+
+@media (max-width: 900px) {
+
+    .site-header {
+
+        padding: 20px 28px;
+    }
+
+    .signup-container {
+
+        grid-template-columns: 1fr;
+    }
+
+    .info-column {
+
+        display: grid;
+
+        grid-template-columns: 1fr 1fr;
+
+        align-items: start;
+    }
+
+    .hero-card {
+
+        grid-column: span 2;
+    }
+
+    .safeguards-card {
+
+        grid-column: span 2;
+    }
+
+    .form-column {
+
+        padding: 35px;
+    }
+
+}
+
+
+/* =========================================
+   MOBILE
+   ========================================= */
+
+@media (max-width: 650px) {
+
+    .site-header {
+
+        padding: 18px 20px;
+    }
+
+    .sso-status {
+
+        display: none;
+    }
+
+    .main-content {
+
+        padding: 10px 12px 35px;
+    }
+
+    .signup-container {
+
+        gap: 15px;
+    }
+
+    .info-column {
+
+        display: flex;
+
+        flex-direction: column;
+    }
+
+    .hero-card {
+
+        padding: 30px 25px;
+    }
+
+    .hero-card h1 {
+
+        font-size: 38px;
+    }
+
+    .campus-visual {
+
+        height: 150px;
+    }
+
+    .safeguards-card {
+
+        padding: 20px;
+    }
+
+    .form-column {
+
+        padding: 28px 20px;
+    }
+
+    .form-grid {
+
+        grid-template-columns: 1fr;
+
+        gap: 18px;
+    }
+
+    .form-header h2 {
+
+        font-size: 27px;
+    }
+
+    .login-switch {
+
+        flex-direction: column;
+
+        align-items: center;
+    }
+
+}
+
+
+/* =========================================
+   SMALL MOBILE
+   ========================================= */
+
+@media (max-width: 400px) {
+
+    .brand-subtitle {
+
+        display: none;
+    }
+
+    .brand-name {
+
+        font-size: 18px;
+    }
+
+    .hero-card h1 {
+
+        font-size: 34px;
+    }
+
+    .form-column {
+
+        padding: 25px 17px;
+    }
+
+    .divider p {
+
+        font-size: 8px;
+    }
+
+}
