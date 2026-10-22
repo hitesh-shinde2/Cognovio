@@ -66,7 +66,7 @@
 
         const savedEmail =
             localStorage.getItem(
-                "mindspace_remembered_email"
+                "cognovio_remembered_email"
             );
 
         if (savedEmail) {
@@ -269,161 +269,116 @@
        LOGIN FORM
        ========================================= */
 
-    loginForm.addEventListener(
-        "submit",
-        function (event) {
 
-            event.preventDefault();
+    loginForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
 
-            let valid = true;
+        let valid = true;
 
-            authAlert.classList.add("hidden");
+        authAlert.classList.add("hidden");
+        emailError.classList.add("hidden");
+        passwordError.classList.add("hidden");
 
-            emailError.classList.add("hidden");
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
 
-            passwordError.classList.add("hidden");
+        // Validate email
+        if (!email || !validateEmail(email)) {
+            emailError.classList.remove("hidden");
+            valid = false;
+        }
 
+        // Validate password
+        if (!password || password.length < 8 || password.length > 72) {
+            passwordError.classList.remove("hidden");
+            valid = false;
+        }
 
-            const email =
-                emailInput.value.trim();
+        if (!valid) {
+            authAlertText.textContent =
+                "Please correct the highlighted fields.";
+            authAlert.classList.remove("hidden");
+            return;
+        }
 
-            const password =
-                passwordInput.value;
+        // Show loading state
+        btnSpinner.classList.remove("hidden");
+        btnLabel.textContent = "Signing In...";
+        submitBtn.disabled = true;
 
-
-            /* EMAIL */
-
-            if (
-                !email ||
-                !validateEmail(email)
-            ) {
-
-                emailError.classList.remove(
-                    "hidden"
-                );
-
-                valid = false;
-
-            }
-
-
-            /* PASSWORD */
-
-            if (
-                !password ||
-                password.length < 6
-            ) {
-
-                passwordError.classList.remove(
-                    "hidden"
-                );
-
-                valid = false;
-
-            }
-
-
-            /* STOP IF INVALID */
-
-            if (!valid) {
-
-                authAlertText.textContent =
-                    "Please correct the highlighted fields.";
-
-                authAlert.classList.remove(
-                    "hidden"
-                );
-
-                return;
-
-            }
-
-
-            /* LOADING */
-
-            btnSpinner.classList.remove(
-                "hidden"
+        try {
+            const response = await fetch(
+                "https://cognovio-api.onrender.com/auth/login",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                }
             );
 
-            btnLabel.textContent =
-                "Signing In...";
+            const result = await response.json();
 
-            submitBtn.disabled = true;
+            if (!response.ok) {
+                throw new Error(
+                    result.detail || "Unable to sign in."
+                );
+            }
 
+            // Store the token for authenticated API requests.
+            // Never store the password.
+            sessionStorage.setItem(
+                "cognovio_access_token",
+                result.access_token
+            );
 
-            /* MOCK AUTHENTICATION */
+            sessionStorage.setItem(
+                "cognovio_user",
+                JSON.stringify(result.user)
+            );
+
+            // Remember only the email if requested.
+            if (rememberMe.checked) {
+                localStorage.setItem(
+                    "cognovio_remembered_email",
+                    email
+                );
+            } else {
+                localStorage.removeItem(
+                    "cognovio_remembered_email"
+                );
+            }
+
+            showToast(
+                "Welcome Back",
+                "Login successful! Opening Cognovio..."
+            );
 
             setTimeout(function () {
+                window.location.href = "index.html";
+            }, 1000);
 
-                try {
+        } catch (error) {
+            console.error("Login error:", error);
 
-                    if (rememberMe.checked) {
+            showToast(
+                "Login Failed",
+                error.message === "Failed to fetch"
+                    ? "Cannot connect to the server. Check that FastAPI is running."
+                    : error.message,
+                true
+            );
 
-                        localStorage.setItem(
-                            "mindspace_remembered_email",
-                            email
-                        );
-
-                    } else {
-
-                        localStorage.removeItem(
-                            "mindspace_remembered_email"
-                        );
-
-                    }
-
-
-                    localStorage.setItem(
-                        "mindspace_authenticated",
-                        "true"
-                    );
-
-                    localStorage.setItem(
-                        "mindspace_auth_type",
-                        "credentials"
-                    );
-
-                    localStorage.setItem(
-                        "mindspace_user",
-                        email
-                    );
-
-                } catch (error) {
-
-                    console.warn(
-                        "Storage unavailable:",
-                        error
-                    );
-
-                }
-
-
-                btnSpinner.classList.add(
-                    "hidden"
-                );
-
-                btnLabel.textContent =
-                    "Sign In to MindSpace";
-
-                submitBtn.disabled = false;
-
-
-                showToast(
-                    "Welcome Back",
-                    "Opening your MindSpace workspace..."
-                );
-
-
-                setTimeout(function () {
-
-                    window.location.href =
-                        "index.html";
-
-                }, 1000);
-
-            }, 900);
-
+        } finally {
+            btnSpinner.classList.add("hidden");
+            btnLabel.textContent = "Sign In to COGNOVIO";
+            submitBtn.disabled = false;
         }
-    );
+    });
+
 
 })();

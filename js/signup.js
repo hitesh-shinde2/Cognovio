@@ -407,211 +407,129 @@
        FORM VALIDATION
        ========================================= */
 
-    form.addEventListener(
-        "submit",
-        function (event) {
 
-            event.preventDefault();
+    form.addEventListener("submit", async function (event) {
+        event.preventDefault();
 
-            let valid = true;
+        let valid = true;
 
+        // Validate name
+        const nameError = document.getElementById("nameError");
+        if (!fullName.value.trim()) {
+            nameError.classList.remove("hidden");
+            valid = false;
+        } else {
+            nameError.classList.add("hidden");
+        }
 
-            /* ---------- NAME ---------- */
+        // Validate email
+        const emailError = document.getElementById("emailError");
+        if (!isValidCampusEmail(studentEmail.value)) {
+            emailError.classList.remove("hidden");
+            valid = false;
+        } else {
+            emailError.classList.add("hidden");
+        }
 
-            const nameError =
-                document.getElementById(
-                    "nameError"
-                );
+        // Validate major
+        const majorError = document.getElementById("majorError");
+        if (!academicMajor.value.trim()) {
+            majorError.classList.remove("hidden");
+            valid = false;
+        } else {
+            majorError.classList.add("hidden");
+        }
 
-            if (!fullName.value.trim()) {
+        // Validate academic year
+        if (!academicYear.value) {
+            showStatus("Please select your academic year.", "error");
+            valid = false;
+        }
 
-                nameError.classList.remove(
-                    "hidden"
-                );
+        // Validate password
+        if (
+            passField.value.length < 8 ||
+            passField.value.length > 72 ||
+            passField.value !== confirmPass.value
+        ) {
+            matchFeedback.classList.remove("hidden");
+            matchFeedback.textContent =
+                "Passwords must match and contain 8–72 characters.";
+            matchFeedback.className = "match-feedback error";
+            valid = false;
+        }
 
-                valid = false;
+        // Validate terms
+        if (!termsConsent.checked) {
+            showStatus(
+                "Please accept the Student Wellbeing Privacy Charter.",
+                "error"
+            );
+            valid = false;
+        }
 
-            } else {
+        if (!valid) return;
 
-                nameError.classList.add(
-                    "hidden"
-                );
+        // Send registration details to the backend
+        submitBtn.disabled = true;
+        const originalButtonText = submitBtn.textContent;
+        submitBtn.textContent = "Creating account...";
 
+        try {
+            const response = await fetch(
+                "https://cognovio-api.onrender.com/auth/register",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        name: fullName.value.trim(),
+                        email: studentEmail.value.trim(),
+                        password: passField.value,
+                        student_id: null
+                    })
+                }
+            );
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                const errorMessage = Array.isArray(result.detail)
+                    ? result.detail.map(error => error.msg).join(", ")
+                    : result.detail;
+
+                throw new Error(errorMessage || "Registration failed.");
             }
-
-
-            /* ---------- EMAIL ---------- */
-
-            const emailError =
-                document.getElementById(
-                    "emailError"
-                );
-
-            if (
-                !isValidCampusEmail(
-                    studentEmail.value
-                )
-            ) {
-
-                emailError.classList.remove(
-                    "hidden"
-                );
-
-                valid = false;
-
-            } else {
-
-                emailError.classList.add(
-                    "hidden"
-                );
-
-            }
-
-
-            /* ---------- MAJOR ---------- */
-
-            const majorError =
-                document.getElementById(
-                    "majorError"
-                );
-
-            if (!academicMajor.value.trim()) {
-
-                majorError.classList.remove(
-                    "hidden"
-                );
-
-                valid = false;
-
-            } else {
-
-                majorError.classList.add(
-                    "hidden"
-                );
-
-            }
-
-
-            /* ---------- PASSWORD ---------- */
-
-            if (
-                passField.value.length < 8 ||
-                passField.value !==
-                confirmPass.value
-            ) {
-
-                matchFeedback.classList.remove(
-                    "hidden"
-                );
-
-                matchFeedback.textContent =
-                    "Verify password requirements";
-
-                matchFeedback.className =
-                    "match-feedback error";
-
-                valid = false;
-
-            }
-
-
-            /* ---------- TERMS ---------- */
-
-            if (!termsConsent.checked) {
-
-                showStatus(
-                    "Please review and accept the Student Wellbeing Privacy Charter.",
-                    "error"
-                );
-
-                valid = false;
-
-            }
-
-
-            /* ---------- STOP ---------- */
-
-            if (!valid) {
-
-                return;
-
-            }
-
-
-            /* =================================
-               MOCK REGISTRATION
-               ================================= */
-
-            const newStudent = {
-
-                name:
-                    fullName.value.trim(),
-
-                email:
-                    studentEmail.value.trim(),
-
-                major:
-                    academicMajor.value.trim(),
-
-                year:
-                    academicYear.value,
-
-                registeredAt:
-                    new Date().toISOString()
-
-            };
-
-
-            try {
-
-                localStorage.setItem(
-                    "mindspace_active_user",
-                    JSON.stringify(newStudent)
-                );
-
-                localStorage.setItem(
-                    "mindspace_authenticated",
-                    "true"
-                );
-
-            } catch (error) {
-
-                console.warn(
-                    "LocalStorage unavailable:",
-                    error
-                );
-
-            }
-
-
-            /* =================================
-               SUCCESS
-               ================================= */
-
-            submitBtn.disabled = true;
-
-            submitBtn.textContent =
-                "Account Created ✓";
-
 
             showStatus(
-                "Welcome to MindSpace. Your student space is ready.",
+                "Registration successful! Please log in.",
                 "success"
             );
 
+            form.reset();
+            checkPasswordMatch();
 
-            setTimeout(
-                function () {
+            // Redirect only if login.html exists
+            setTimeout(function () {
+                window.location.href = "login.html";
+            }, 1500);
 
-                    window.location.href =
-                        "index.html";
+        } catch (error) {
+            console.error("Registration error:", error);
 
-                },
-                1200
+            showStatus(
+                error.message === "Failed to fetch"
+                    ? "Cannot connect to the server. Check that FastAPI is running."
+                    : error.message,
+                "error"
             );
-
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalButtonText;
         }
-    );
+    });
+
 
 
 })();

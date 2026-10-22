@@ -1,4 +1,20 @@
 /* ============================================
+   COGNOVIO AUTHENTICATION GUARD
+   Verify the JWT with the backend before showing
+   the dashboard.
+============================================ */
+
+const cognovioToken = sessionStorage.getItem("cognovio_access_token");
+
+if (!cognovioToken) {
+    window.location.replace("login.html");
+    throw new Error("Authentication required. Redirecting to login.");
+}
+
+// Hide dashboard content until the backend verifies the token.
+document.documentElement.style.visibility = "hidden";
+
+/* ============================================
    MINDSPACE DASHBOARD JAVASCRIPT
 ============================================ */
 
@@ -85,44 +101,63 @@ const chatInput =
 ============================================ */
 
 function getUser() {
-
     try {
-
-        const storedUser =
-            localStorage.getItem("mindspace_active_user");
-
+        const storedUser = sessionStorage.getItem("cognovio_user");
         if (storedUser) {
-
             return JSON.parse(storedUser);
-
         }
-
     } catch (error) {
-
-        console.error(
-            "Unable to read user data:",
-            error
-        );
-
+        console.error("Unable to read Cognovio user data:", error);
     }
 
-
     return {
-
         name: "Student",
-
-        email: "student@university.edu",
-
-        major: "University Student",
-
-        year: "year_1"
-
+        email: "",
+        student_id: null
     };
-
 }
 
-
 const user = getUser();
+
+/*
+ * Validate the JWT with FastAPI and refresh the profile from MySQL.
+ */
+async function verifyCognovioSession() {
+    try {
+        const response = await fetch("https://cognovio-api.onrender.com/auth/me", {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${cognovioToken}`,
+                "Accept": "application/json"
+            }
+        });
+
+        if (response.status === 401 || response.status === 403) {
+            sessionStorage.removeItem("cognovio_access_token");
+            sessionStorage.removeItem("cognovio_user");
+            window.location.replace("login.html");
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error(`Authentication check failed (HTTP ${response.status}).`);
+        }
+
+        const verifiedUser = await response.json();
+        Object.assign(user, verifiedUser);
+        sessionStorage.setItem("cognovio_user", JSON.stringify(verifiedUser));
+
+        displayUser();
+        await loadMoodHistory();
+        document.documentElement.style.visibility = "visible";
+    } catch (error) {
+        console.error("Unable to verify Cognovio session:", error);
+        alert("Cognovio could not verify your session. Make sure the FastAPI backend is running, then log in again.");
+        sessionStorage.removeItem("cognovio_access_token");
+        sessionStorage.removeItem("cognovio_user");
+        window.location.replace("login.html");
+    }
+}
 
 
 /* ============================================
@@ -371,90 +406,113 @@ const moodValues = {
 };
 
 
+let moodHistoryCache = [];
+
 function getMoodHistory() {
-
-    try {
-
-        return JSON.parse(
-            localStorage.getItem(
-                "mindspace_mood_history"
-            )
-        ) || [];
-
-    } catch {
-
-        return [];
-
-    }
-
+    return moodHistoryCache;
 }
 
+function localDateString(date = new Date()) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+}
 
-function saveMood(mood) {
-
-    const history =
-        getMoodHistory();
-
-
-    const today =
-        new Date().toISOString()
-            .split("T")[0];
-
-
-    const existingIndex =
-        history.findIndex(
-            item => item.date === today
-        );
-
-
-    const moodEntry = {
-
-        mood: mood,
-
-        score: moodValues[mood],
-
-        date: today,
-
-        time:
-            new Date().toLocaleTimeString(
-                "en-IN",
-                {
-                    hour: "2-digit",
-                    minute: "2-digit"
-                }
-            )
-
+function normalizeMoodRecord(record) {
+    const createdAt = record.created_at ? new Date(record.created_at) : null;
+    return {
+        id: record.id,
+        mood: record.mood,
+        score: Number(record.score),
+        date: record.check_in_date,
+        time: createdAt && !Number.isNaN(createdAt.getTime())
+            ? createdAt.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })
+            : ""
     };
+}
 
+async function loadMoodHistory() {
+    try {
+        const response = await fetch("https://cognovio-api.onrender.com/moods/", {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${cognovioToken}`,
+                "Accept": "application/json"
+            }
+        });
 
-    if (existingIndex >= 0) {
+        if (response.status === 401 || response.status === 403) {
+            logout();
+            return;
+        }
+        if (!response.ok) {
+            throw new Error(`Unable to load mood history (HTTP ${response.status}).`);
+        }
 
-        history[existingIndex] =
-            moodEntry;
-
-    } else {
-
-        history.unshift(
-            moodEntry
-        );
-
+        const records = await response.json();
+        moodHistoryCache = records.map(normalizeMoodRecord);
+        const today = localDateString();
+        const todayEntry = moodHistoryCache.find(item => item.date === today);
+        document.querySelectorAll(".mood-option").forEach(button => {
+            button.classList.toggle("selected", Boolean(todayEntry) && button.dataset.mood === todayEntry.mood);
+        });
+        calculateWellbeing();
+        calculateStreak();
+        renderMoodHistory();
+    } catch (error) {
+        console.error("Unable to load mood history:", error);
+        showMoodMessage(moodMessage, "Couldn't load your mood history. Please try again.");
+        showMoodMessage(moodPageMessage, "Couldn't load your mood history. Please try again.");
     }
+}
 
+async function saveMood(mood) {
+    try {
+        const response = await fetch("https://cognovio-api.onrender.com/moods/", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${cognovioToken}`,
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify({ mood })
+        });
 
-    localStorage.setItem(
-        "mindspace_mood_history",
-        JSON.stringify(history)
-    );
+        if (response.status === 401 || response.status === 403) {
+            logout();
+            return false;
+        }
+        if (!response.ok) {
+            let detail = "Unable to save your mood. Please try again.";
+            try {
+                const errorBody = await response.json();
+                if (errorBody.detail) detail = errorBody.detail;
+            } catch (_) {}
+            throw new Error(detail);
+        }
 
+        const savedRecord = await response.json();
+        const normalized = normalizeMoodRecord(savedRecord);
+        const existingIndex = moodHistoryCache.findIndex(item => item.date === normalized.date);
+        if (existingIndex >= 0) {
+            moodHistoryCache[existingIndex] = normalized;
+        } else {
+            moodHistoryCache.unshift(normalized);
+        }
+        moodHistoryCache.sort((a, b) => b.date.localeCompare(a.date));
 
-    calculateWellbeing();
-
-    calculateStreak();
-
-    renderActivity();
-
-    renderMoodHistory();
-
+        calculateWellbeing();
+        calculateStreak();
+        renderActivity();
+        renderMoodHistory();
+        return true;
+    } catch (error) {
+        console.error("Unable to save mood:", error);
+        showMoodMessage(moodMessage, error.message || "Unable to save your mood. Please try again.");
+        showMoodMessage(moodPageMessage, error.message || "Unable to save your mood. Please try again.");
+        return false;
+    }
 }
 
 
@@ -463,54 +521,23 @@ function saveMood(mood) {
 document
     .querySelectorAll(".mood-option")
     .forEach(button => {
+        button.addEventListener("click", async () => {
+            const mood = button.dataset.mood;
+            if (!Object.prototype.hasOwnProperty.call(moodValues, mood)) return;
 
-        button.addEventListener(
-            "click",
-            () => {
+            const saved = await saveMood(mood);
+            if (!saved) return;
 
-                const mood =
-                    button.dataset.mood;
+            document.querySelectorAll(".mood-option").forEach(matchingButton => {
+                matchingButton.classList.toggle("selected", matchingButton.dataset.mood === mood);
+            });
 
+            const message = `Check-in saved: You're feeling ${mood.toLowerCase()} today.`;
+            showMoodMessage(moodMessage, message);
+            showMoodMessage(moodPageMessage, message);
 
-                /*
-                 * Highlight all matching
-                 * mood buttons.
-                 */
-
-                document
-                    .querySelectorAll(
-                        `.mood-option[data-mood="${mood}"]`
-                    )
-                    .forEach(
-                        matchingButton => {
-
-                            matchingButton
-                                .classList
-                                .add("selected");
-
-                        }
-                    );
-
-
-                saveMood(mood);
-
-
-                const message =
-                    `Check-in saved: You're feeling ${mood.toLowerCase()} today.`;
-
-                showMoodMessage(
-                    moodMessage,
-                    message
-                );
-
-                showMoodMessage(
-                    moodPageMessage,
-                    message
-                );
-
-            }
-        );
-
+            saveActivity("mood", "Mood check-in", `Recorded mood: ${mood}`);
+        });
     });
 
 
@@ -622,9 +649,7 @@ function calculateStreak() {
     for (const dateString of dates) {
 
         const expected =
-            currentDate
-                .toISOString()
-                .split("T")[0];
+            localDateString(currentDate);
 
 
         if (dateString === expected) {
@@ -1022,16 +1047,7 @@ sessionCount.textContent =
     chatSessions;
 
 
-/*
- * TEMPORARY MOCK AI
- *
- * Later replace generateAIResponse()
- * with:
- *
- * fetch("http://localhost:8000/chat")
- *
- * or your deployed FastAPI URL.
- */
+
 
 function generateAIResponse(
     message
@@ -1326,23 +1342,10 @@ openChatBtn?.addEventListener(
 ============================================ */
 
 function logout() {
-
-    /*
-     * For the current prototype we remove
-     * the active user.
-     *
-     * With real authentication this should
-     * instead clear the JWT/session.
-     */
-
-    localStorage.removeItem(
-        "mindspace_active_user"
-    );
-
-
-    window.location.href =
-        "login.html";
-
+    sessionStorage.removeItem("cognovio_access_token");
+    sessionStorage.removeItem("cognovio_user");
+    localStorage.removeItem("mindspace_active_user");
+    window.location.replace("login.html");
 }
 
 
@@ -1376,3 +1379,6 @@ document.addEventListener(
 
     }
 );
+
+/* Verify authentication and populate the real user profile. */
+verifyCognovioSession();
