@@ -4,6 +4,8 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 from models.user import User
 from models.mood import MoodCheckIn
+from models.conversation import Conversation, ChatMessage
+from routers.conversations import router as conversations_router
 from routes.moods import router as moods_router
 from database import get_db
 from database import Base, engine
@@ -38,6 +40,7 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(moods_router)
+app.include_router(conversations_router)
 
 @app.get("/")
 def root():
