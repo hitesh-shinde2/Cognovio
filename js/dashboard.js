@@ -14,8 +14,21 @@ if (!cognovioToken) {
 // Hide dashboard content until the backend verifies the token.
 document.documentElement.style.visibility = "hidden";
 
+//frontend API URL
+const API_BASE_URL = [
+    "localhost",
+    "127.0.0.1"
+].includes(window.location.hostname)
+    ? "http://127.0.0.1:8000"
+    : "https://cognovio-api.onrender.com";
+
+const API_TOKEN = sessionStorage.getItem(
+    "cognovio_access_token"
+);
+
+let activeConversationId = null;
 /* ============================================
-   MINDSPACE DASHBOARD JAVASCRIPT
+   COGNOVIO DASHBOARD JAVASCRIPT
 ============================================ */
 
 
@@ -148,7 +161,10 @@ async function verifyCognovioSession() {
         sessionStorage.setItem("cognovio_user", JSON.stringify(verifiedUser));
 
         displayUser();
+
         await loadMoodHistory();
+        await loadLatestConversation();
+
         document.documentElement.style.visibility = "visible";
     } catch (error) {
         console.error("Unable to verify Cognovio session:", error);
@@ -1032,99 +1048,185 @@ renderActivity();
 
 
 /* ============================================
-   AI CHAT
+   COGNOVIO AI CHAT - GROQ INTEGRATION
 ============================================ */
 
-let chatSessions =
-    Number(
-        localStorage.getItem(
-            "mindspace_chat_sessions"
-        )
-    ) || 0;
+let chatSessions = Number(
+    localStorage.getItem("cognovio_chat_sessions")
+) || 0;
+
+sessionCount.textContent = chatSessions;
 
 
-sessionCount.textContent =
-    chatSessions;
-
-
-
-
-function generateAIResponse(
-    message
-) {
-
-    const text =
-        message.toLowerCase();
-
-
-    if (
-        text.includes("stress") ||
-        text.includes("overwhelmed")
-    ) {
-
-        return `
-            It sounds like you've got a lot happening
-            right now. You don't have to solve everything
-            at once. Try identifying the one thing that
-            feels most urgent, and let's start there.
-        `;
-
-    }
-
-
-    if (
-        text.includes("focus") ||
-        text.includes("concentrat")
-    ) {
-
-        return `
-            Difficulty focusing can happen when your mind
-            is carrying too much. Try taking a short break,
-            getting some water, and choosing one small task
-            to work on for the next 15 minutes.
-        `;
-
-    }
-
-
-    if (
-        text.includes("lonely") ||
-        text.includes("alone")
-    ) {
-
-        return `
-            Feeling lonely can be really difficult,
-            especially during university. You don't need
-            to force yourself to feel better immediately.
-            If you'd like, we can talk about what's been
-            making you feel disconnected.
-        `;
-
-    }
-
-
-    if (
-        text.includes("sad") ||
-        text.includes("bad") ||
-        text.includes("low")
-    ) {
-
-        return `
-            I'm sorry you're having a difficult moment.
-            You can take your time here. What has been
-            weighing on you the most lately?
-        `;
-
-    }
-
-
-    return `
-        Thanks for sharing that with me. I'm listening.
-        Tell me a little more about what's been going
-        through your mind.
-    `;
-
+// Common authenticated API headers
+function getChatHeaders() {
+    return {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${API_TOKEN}`
+    };
 }
+
+
+// Load the latest conversation
+async function loadLatestConversation() {
+    try {
+        const response = await fetch(
+            `${API_BASE_URL}/conversations/`,
+            {
+                headers: getChatHeaders()
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error("Unable to load conversations.");
+        }
+
+        const conversations = await response.json();
+
+        if (!conversations.length) return;
+
+        activeConversationId = conversations[0].id;
+
+        const historyResponse = await fetch(
+            `${API_BASE_URL}/conversations/${activeConversationId}`,
+            {
+                headers: getChatHeaders()
+            }
+        );
+
+        if (!historyResponse.ok) {
+            throw new Error("Unable to load chat history.");
+        }
+
+        const history = await historyResponse.json();
+
+        history.messages.forEach(message => {
+            addChatMessage(
+                message.content,
+                message.role === "user" ? "user" : "ai"
+            );
+        });
+
+    } catch (error) {
+        console.error("Conversation history error:", error);
+    }
+}
+
+
+// Create a conversation when the user starts chatting
+async function createConversation(firstMessage) {
+
+    const response = await fetch(
+        `${API_BASE_URL}/conversations/`,
+        {
+            method: "POST",
+            headers: getChatHeaders(),
+            body: JSON.stringify({
+                title: firstMessage.slice(0, 60)
+            })
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error("Unable to create conversation.");
+    }
+
+    const data = await response.json();
+
+    activeConversationId = data.conversation_id;
+
+    return activeConversationId;
+}
+
+
+// Send message to Groq through FastAPI
+async function sendChatMessage(message) {
+
+    if (!activeConversationId) {
+        await createConversation(message);
+    }
+
+    const response = await fetch(
+        `${API_BASE_URL}/conversations/${activeConversationId}/chat`,
+        {
+            method: "POST",
+            headers: getChatHeaders(),
+            body: JSON.stringify({
+                message: message
+            })
+        }
+    );
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+            errorData.detail || "Unable to get AI response."
+        );
+    }
+
+    return await response.json();
+}
+
+
+// Chat form submission
+chatForm?.addEventListener("submit", async (event) => {
+
+    event.preventDefault();
+
+    const message = chatInput.value.trim();
+
+    if (!message) return;
+
+    addChatMessage(message, "user");
+
+    chatInput.value = "";
+
+    saveActivity(
+        "chat",
+        "AI conversation",
+        "Started a conversation with Cognovio AI"
+    );
+
+    chatSessions++;
+
+    localStorage.setItem(
+        "cognovio_chat_sessions",
+        chatSessions
+    );
+
+    sessionCount.textContent = chatSessions;
+
+    const submitButton = chatForm.querySelector(
+        'button[type="submit"]'
+    );
+
+    if (submitButton) submitButton.disabled = true;
+
+    try {
+
+        const data = await sendChatMessage(message);
+
+        addChatMessage(data.response, "ai");
+
+    } catch (error) {
+
+        console.error("Cognovio chat error:", error);
+
+        addChatMessage(
+            "I'm having trouble connecting right now. Please try again shortly.",
+            "ai"
+        );
+
+    } finally {
+
+        if (submitButton) submitButton.disabled = false;
+
+        chatInput.focus();
+
+    }
+
+});
+
 
 
 /* ============================================
@@ -1178,7 +1280,7 @@ function addChatMessage(
 
     author.textContent =
         sender === "ai"
-            ? "MindSpace AI"
+            ? "Cognovio AI"
             : "You";
 
 
@@ -1208,77 +1310,65 @@ function addChatMessage(
 }
 
 
+    
 /* ============================================
    CHAT SUBMISSION
 ============================================ */
+chatForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
 
-chatForm?.addEventListener(
-    "submit",
-    event => {
+    const message = chatInput.value.trim();
 
-        event.preventDefault();
+    if (!message) return;
 
+    addChatMessage(message, "user");
+    chatInput.value = "";
 
-        const message =
-            chatInput.value.trim();
+    saveActivity(
+        "chat",
+        "AI conversation",
+        "Started a conversation with Cognovio AI"
+    );
 
+    // Update session count
+    chatSessions++;
 
-        if (!message) return;
+    localStorage.setItem(
+        "cognovio_chat_sessions",
+        chatSessions
+    );
 
+    sessionCount.textContent = chatSessions;
+
+    try {
+        const response = await fetch("/chat/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                message: message
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        addChatMessage(data.response, "ai");
+
+    } catch (error) {
+        console.error("Cognovio chat error:", error);
 
         addChatMessage(
-            message,
-            "user"
+            "I'm having trouble connecting right now. Please try again shortly.",
+            "ai"
         );
-
-
-        chatInput.value = "";
-
-
-        saveActivity(
-            "chat",
-            "AI conversation",
-            "Started a conversation with MindSpace AI"
-        );
-
-
-        /*
-         * Update session count.
-         */
-
-        chatSessions++;
-
-        localStorage.setItem(
-            "mindspace_chat_sessions",
-            chatSessions
-        );
-
-
-        sessionCount.textContent =
-            chatSessions;
-
-
-        /*
-         * Temporary simulated response.
-         */
-
-        setTimeout(() => {
-
-            const response =
-                generateAIResponse(
-                    message
-                );
-
-
-            addChatMessage(
-                response,
-                "ai"
-            );
-
-        }, 700);
-
     }
-);
+});
+
 
 
 /* ============================================
