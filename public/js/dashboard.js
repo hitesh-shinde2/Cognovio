@@ -14,8 +14,21 @@ if (!cognovioToken) {
 // Hide dashboard content until the backend verifies the token.
 document.documentElement.style.visibility = "hidden";
 
+//frontend API URL
+const API_BASE_URL = [
+    "localhost",
+    "127.0.0.1"
+].includes(window.location.hostname)
+    ? "http://127.0.0.1:8000"
+    : "https://cognovio-api.onrender.com";
+
+const API_TOKEN = sessionStorage.getItem(
+    "cognovio_access_token"
+);
+
+let activeConversationId = null;
 /* ============================================
-   MINDSPACE DASHBOARD JAVASCRIPT
+   COGNOVIO DASHBOARD JAVASCRIPT
 ============================================ */
 
 
@@ -124,7 +137,7 @@ const user = getUser();
  */
 async function verifyCognovioSession() {
     try {
-        const response = await fetch("https://cognovio-api.onrender.com/auth/me", {
+        const response = await fetch(`${API_BASE_URL}/auth/me`, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${cognovioToken}`,
@@ -148,7 +161,10 @@ async function verifyCognovioSession() {
         sessionStorage.setItem("cognovio_user", JSON.stringify(verifiedUser));
 
         displayUser();
+
         await loadMoodHistory();
+        await loadLatestConversation();
+
         document.documentElement.style.visibility = "visible";
     } catch (error) {
         console.error("Unable to verify Cognovio session:", error);
@@ -434,7 +450,7 @@ function normalizeMoodRecord(record) {
 
 async function loadMoodHistory() {
     try {
-        const response = await fetch("https://cognovio-api.onrender.com/moods/", {
+        const response = await fetch(`${API_BASE_URL}/moods/`, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${cognovioToken}`,
@@ -469,7 +485,7 @@ async function loadMoodHistory() {
 
 async function saveMood(mood) {
     try {
-        const response = await fetch("https://cognovio-api.onrender.com/moods/", {
+        const response = await fetch(`${API_BASE_URL}/moods/`, {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${cognovioToken}`,
@@ -1032,100 +1048,398 @@ renderActivity();
 
 
 /* ============================================
-   AI CHAT
+   COGNOVIO AI CHAT - GROQ INTEGRATION
 ============================================ */
 
-let chatSessions =
-    Number(
-        localStorage.getItem(
-            "mindspace_chat_sessions"
-        )
-    ) || 0;
+let chatSessions = Number(
+    localStorage.getItem("cognovio_chat_sessions")
+) || 0;
+
+sessionCount.textContent = chatSessions;
 
 
-sessionCount.textContent =
-    chatSessions;
-
-
-
-
-function generateAIResponse(
-    message
-) {
-
-    const text =
-        message.toLowerCase();
-
-
-    if (
-        text.includes("stress") ||
-        text.includes("overwhelmed")
-    ) {
-
-        return `
-            It sounds like you've got a lot happening
-            right now. You don't have to solve everything
-            at once. Try identifying the one thing that
-            feels most urgent, and let's start there.
-        `;
-
-    }
-
-
-    if (
-        text.includes("focus") ||
-        text.includes("concentrat")
-    ) {
-
-        return `
-            Difficulty focusing can happen when your mind
-            is carrying too much. Try taking a short break,
-            getting some water, and choosing one small task
-            to work on for the next 15 minutes.
-        `;
-
-    }
-
-
-    if (
-        text.includes("lonely") ||
-        text.includes("alone")
-    ) {
-
-        return `
-            Feeling lonely can be really difficult,
-            especially during university. You don't need
-            to force yourself to feel better immediately.
-            If you'd like, we can talk about what's been
-            making you feel disconnected.
-        `;
-
-    }
-
-
-    if (
-        text.includes("sad") ||
-        text.includes("bad") ||
-        text.includes("low")
-    ) {
-
-        return `
-            I'm sorry you're having a difficult moment.
-            You can take your time here. What has been
-            weighing on you the most lately?
-        `;
-
-    }
-
-
-    return `
-        Thanks for sharing that with me. I'm listening.
-        Tell me a little more about what's been going
-        through your mind.
-    `;
-
+// Common authenticated API headers
+function getChatHeaders() {
+    return {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${API_TOKEN}`
+    };
 }
 
+
+// Load the latest conversation
+async function loadLatestConversation() {
+    try {
+        const response = await fetch(
+            `${API_BASE_URL}/conversations/`,
+            {
+                headers: getChatHeaders()
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error("Unable to load conversations.");
+        }
+
+        const conversations = await response.json();
+
+        if (!conversations.length) return;
+
+        activeConversationId = conversations[0].id;
+
+        const historyResponse = await fetch(
+            `${API_BASE_URL}/conversations/${activeConversationId}`,
+            {
+                headers: getChatHeaders()
+            }
+        );
+
+        if (!historyResponse.ok) {
+            throw new Error("Unable to load chat history.");
+        }
+
+        const history = await historyResponse.json();
+
+        // Replace the static welcome message with the saved conversation history.
+        chatWindow.innerHTML = "";
+
+        history.messages.forEach(message => {
+            addChatMessage(
+                message.content,
+                message.role === "user" ? "user" : "ai"
+            );
+        });
+
+    } catch (error) {
+        console.error("Conversation history error:", error);
+    }
+}
+
+
+// Create a conversation when the user starts chatting
+async function createConversation(firstMessage) {
+
+    const response = await fetch(
+        `${API_BASE_URL}/conversations/`,
+        {
+            method: "POST",
+            headers: getChatHeaders(),
+            body: JSON.stringify({
+                title: firstMessage.slice(0, 60)
+            })
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error("Unable to create conversation.");
+    }
+
+    const data = await response.json();
+
+    activeConversationId = data.conversation_id;
+
+    chatSessions++;
+    localStorage.setItem("cognovio_chat_sessions", String(chatSessions));
+    sessionCount.textContent = chatSessions;
+
+    return activeConversationId;
+}
+
+
+// Send message to Groq through FastAPI
+async function sendChatMessage(message) {
+
+    if (!activeConversationId) {
+        await createConversation(message);
+    }
+
+    const response = await fetch(
+        `${API_BASE_URL}/conversations/${activeConversationId}/chat`,
+        {
+            method: "POST",
+            headers: getChatHeaders(),
+            body: JSON.stringify({
+                message: message
+            })
+        }
+    );
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+            errorData.detail || "Unable to get AI response."
+        );
+    }
+
+    return await response.json();
+}
+
+
+// Chat form submission
+chatForm?.addEventListener("submit", async (event) => {
+
+    event.preventDefault();
+
+    const message = chatInput.value.trim();
+
+    if (!message) return;
+
+    addChatMessage(message, "user");
+
+    chatInput.value = "";
+
+    saveActivity(
+        "chat",
+        "AI conversation",
+        "Started a conversation with Cognovio AI"
+    );
+
+    const submitButton = chatForm.querySelector(
+        'button[type="submit"]'
+    );
+
+    if (submitButton) submitButton.disabled = true;
+
+    try {
+
+        const data = await sendChatMessage(message);
+
+        addChatMessage(data.response, "ai");
+
+    } catch (error) {
+
+        console.error("Cognovio chat error:", error);
+
+        addChatMessage(
+            "I'm having trouble connecting right now. Please try again shortly.",
+            "ai"
+        );
+
+    } finally {
+
+        if (submitButton) submitButton.disabled = false;
+
+        chatInput.focus();
+
+    }
+
+});
+
+
+
+/* ============================================
+   CHAT MARKDOWN RENDERER
+   Escapes HTML first, then formats common Markdown.
+============================================ */
+
+function ensureChatMarkdownStyles() {
+    if (document.getElementById("cognovio-markdown-styles")) return;
+
+    const style = document.createElement("style");
+    style.id = "cognovio-markdown-styles";
+    style.textContent = `
+        .message-text {
+            width: 100%;
+            max-width: 100%;
+            line-height: 1.65;
+            overflow-wrap: anywhere;
+            color: inherit;
+        }
+        .message-text p {
+            margin: 0 0 12px;
+            line-height: 1.65;
+        }
+        .message-text p:last-child { margin-bottom: 0; }
+        .message-text h1, .message-text h2, .message-text h3,
+        .message-text h4, .message-text h5, .message-text h6 {
+            margin: 20px 0 9px;
+            line-height: 1.3;
+            font-weight: 700;
+            color: inherit;
+        }
+        .message-text h1 { font-size: 1.45em; }
+        .message-text h2 { font-size: 1.28em; }
+        .message-text h3 { font-size: 1.12em; }
+        .message-text ul, .message-text ol {
+            margin: 8px 0 15px;
+            padding-left: 25px;
+        }
+        .message-text li {
+            margin: 4px 0;
+            padding-left: 2px;
+            line-height: 1.55;
+        }
+        .message-text strong { font-weight: 700; }
+        .message-text em { font-style: italic; }
+        .message-text code {
+            padding: 2px 5px;
+            border-radius: 4px;
+            background: rgba(120, 110, 95, .13);
+            font-family: Consolas, monospace;
+            font-size: .92em;
+        }
+        .message-text hr {
+            border: 0;
+            border-top: 1px solid rgba(120, 110, 95, .35);
+            margin: 16px 0;
+        }
+        .message-text .chat-table-wrap {
+            width: 100%;
+            overflow-x: auto;
+            margin: 12px 0 16px;
+        }
+        .message-text table {
+            width: 100%;
+            min-width: 480px;
+            border-collapse: collapse;
+            table-layout: auto;
+            font-size: .94em;
+            line-height: 1.45;
+        }
+        .message-text th, .message-text td {
+            border: 1px solid #d8d2c8;
+            padding: 10px 12px;
+            text-align: left;
+            vertical-align: top;
+            overflow-wrap: anywhere;
+        }
+        .message-text th {
+            background: #e9e3d9;
+            font-weight: 700;
+        }
+        .message-text blockquote {
+            margin: 12px 0;
+            padding: 10px 14px;
+            border-left: 3px solid #b8a98f;
+            background: rgba(120, 110, 95, .09);
+            border-radius: 0 6px 6px 0;
+        }
+        .message-text blockquote p { margin: 0; }
+        @media (max-width: 640px) {
+            .message-text table { min-width: 440px; }
+            .message-text th, .message-text td { padding: 8px; }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+function renderChatMarkdown(markdown) {
+    const escapeHtml = (value) => String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+    const inline = (value) => escapeHtml(value)
+        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+        .replace(/__(.+?)__/g, "<strong>$1</strong>")
+        .replace(/\*(.+?)\*/g, "<em>$1</em>")
+        .replace(/_(.+?)_/g, "<em>$1</em>")
+        .replace(/`([^`]+)`/g, "<code>$1</code>");
+
+    const lines = String(markdown ?? "").replace(/\r\n?/g, "\n").split("\n");
+    const output = [];
+    let listType = null;
+
+    const closeList = () => {
+        if (listType) {
+            output.push(`</${listType}>`);
+            listType = null;
+        }
+    };
+
+    const getCells = (line) =>
+        line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map(cell => cell.trim());
+
+    const isTableSeparator = (line) => {
+        const cells = getCells(line);
+        return cells.length > 1 && cells.every(cell => /^:?-{3,}:?$/.test(cell));
+    };
+
+    const isTableRow = (line) => line.includes("|") && getCells(line).length > 1;
+
+    const renderTable = (rows) => {
+        const usableRows = rows.filter(row => !isTableSeparator(row));
+        if (!usableRows.length) return;
+
+        const headerCells = getCells(usableRows[0]);
+        const bodyRows = usableRows.slice(1);
+        output.push(`<div class="chat-table-wrap"><table><thead><tr>${headerCells.map(cell => `<th>${inline(cell)}</th>`).join("")}</tr></thead><tbody>`);
+        bodyRows.forEach(row => {
+            const cells = getCells(row);
+            output.push("<tr>" + headerCells.map((_, index) => `<td>${inline(cells[index] ?? "")}</td>`).join("") + "</tr>");
+        });
+        output.push("</tbody></table></div>");
+    };
+
+    for (let i = 0; i < lines.length;) {
+        const raw = lines[i];
+        const line = raw.trim();
+
+        if (!line) {
+            closeList();
+            i++;
+            continue;
+        }
+
+        if (isTableRow(line)) {
+            closeList();
+            const rows = [];
+            while (i < lines.length && isTableRow(lines[i].trim())) {
+                rows.push(lines[i].trim());
+                i++;
+            }
+            renderTable(rows);
+            continue;
+        }
+
+        if (/^[-*_]{3,}$/.test(line)) {
+            closeList();
+            output.push("<hr>");
+            i++;
+            continue;
+        }
+
+        const quote = line.match(/^>\s?(.*)$/);
+        if (quote) {
+            closeList();
+            output.push(`<blockquote><p>${inline(quote[1])}</p></blockquote>`);
+            i++;
+            continue;
+        }
+
+        const heading = line.match(/^(#{1,6})\s+(.+)$/);
+        if (heading) {
+            closeList();
+            const level = heading[1].length;
+            output.push(`<h${level}>${inline(heading[2])}</h${level}>`);
+            i++;
+            continue;
+        }
+
+        const unordered = line.match(/^[-*]\s+(.+)$/);
+        const ordered = line.match(/^\d+[.)]\s+(.+)$/);
+        if (unordered || ordered) {
+            const type = unordered ? "ul" : "ol";
+            if (listType !== type) {
+                closeList();
+                output.push(`<${type}>`);
+                listType = type;
+            }
+            output.push(`<li>${inline((unordered || ordered)[1])}</li>`);
+            i++;
+            continue;
+        }
+
+        closeList();
+        output.push(`<p>${inline(line)}</p>`);
+        i++;
+    }
+
+    closeList();
+    return output.join("");
+}
 
 /* ============================================
    ADD CHAT MESSAGE
@@ -1135,6 +1449,8 @@ function addChatMessage(
     message,
     sender
 ) {
+
+    ensureChatMarkdownStyles();
 
     const wrapper =
         document.createElement("div");
@@ -1178,16 +1494,15 @@ function addChatMessage(
 
     author.textContent =
         sender === "ai"
-            ? "MindSpace AI"
+            ? "Cognovio AI"
             : "You";
 
 
     const text =
-        document.createElement("p");
+        document.createElement("div");
 
-
-    text.textContent =
-        message;
+    text.className = "message-text";
+    text.innerHTML = renderChatMarkdown(message);
 
 
     content.appendChild(author);
@@ -1208,79 +1523,7 @@ function addChatMessage(
 }
 
 
-/* ============================================
-   CHAT SUBMISSION
-============================================ */
-
-chatForm?.addEventListener(
-    "submit",
-    event => {
-
-        event.preventDefault();
-
-
-        const message =
-            chatInput.value.trim();
-
-
-        if (!message) return;
-
-
-        addChatMessage(
-            message,
-            "user"
-        );
-
-
-        chatInput.value = "";
-
-
-        saveActivity(
-            "chat",
-            "AI conversation",
-            "Started a conversation with MindSpace AI"
-        );
-
-
-        /*
-         * Update session count.
-         */
-
-        chatSessions++;
-
-        localStorage.setItem(
-            "mindspace_chat_sessions",
-            chatSessions
-        );
-
-
-        sessionCount.textContent =
-            chatSessions;
-
-
-        /*
-         * Temporary simulated response.
-         */
-
-        setTimeout(() => {
-
-            const response =
-                generateAIResponse(
-                    message
-                );
-
-
-            addChatMessage(
-                response,
-                "ai"
-            );
-
-        }, 700);
-
-    }
-);
-
-
+    
 /* ============================================
    QUICK PROMPTS
 ============================================ */

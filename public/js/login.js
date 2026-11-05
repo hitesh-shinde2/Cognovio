@@ -5,6 +5,11 @@
 
 (function () {
 
+    // Use the local FastAPI server when running the frontend locally.
+    const API_BASE_URL = ["localhost", "127.0.0.1"].includes(window.location.hostname)
+        ? "http://127.0.0.1:8000"
+        : "https://cognovio-api.onrender.com";
+
     const loginForm = document.getElementById("login-form");
 
     const emailInput = document.getElementById("student-email");
@@ -308,7 +313,7 @@
 
         try {
             const response = await fetch(
-                "https://cognovio-api.onrender.com/auth/login",
+                `${API_BASE_URL}/auth/login`,
                 {
                     method: "POST",
                     headers: {
